@@ -3,6 +3,8 @@ const app = express();
 const port = 3000;
 const { Pool } = require('pg');
 
+app.use(express.json());
+
 const pool = new Pool({
     user: 'postgres',
     host: '127.0.0.1',
@@ -21,22 +23,22 @@ app.get('/api/apples', (req, res) => {
     async function allApples() {
         try {
             let querystring = `SELECT * FROM apples`;
-            const result = await pool.query(querystring, [req.params.id]);
+            const result = await pool.query(querystring);
             console.log(result);
             res.send(result.rows);
         } catch (e) {
             console.log(e.stack)
         }
-    }
-    allApples()
+    } 
+  allApples()
 });
 
 
 app.get('/api/apples/:id', (req, res) => {
     async function getApples() {
         try {
-            let querystring = `SELECT * FROM apples WHERE id = $1`;
-            const result = await pool.query(querystring, [req.params.id]);
+            let querystring = 'SELECT * FROM apples WHERE id = $1';
+            const result = await pool.query(querystring,[req.params.id]);
             console.log(result);
             res.send(result.rows);
         } catch (e) {
@@ -53,8 +55,9 @@ app.post('/api/apples', (req, res) => {
             let apples = req.body;
             let type = apples.type;
             let tree = apples.tree;
+            console.log(type,tree);
             let querystring = `INSERT INTO apples (type,tree) VALUES ($1,$2)`;
-            const result = await pool.query(querystring, [req.params]);
+            const result = await pool.query(querystring,[type,tree]);
             console.log(result);
             res.send(result.rows);
         } catch (e) {
@@ -65,30 +68,44 @@ app.post('/api/apples', (req, res) => {
 });
 
 
-// app.patch('/api/apples/:id', (req, res) => {
-//     async function patchApples() {
-//         
-//         try {
-//             
-//         } catch(e) {
-//             console.log(e.stack)
-//         }
-//     }
-//     patchApples()
-// });
+app.patch('/api/apples/:id', (req, res) => {
+    async function patchApples() {
+        try {
+            let id = req.params.id;
+            let apples = req.body;
+            let type = apples.type;
+            let tree = apples.tree;
+            let querystring = 'UPDATE apples SET type = $1, tree = $2 WHERE id =$3';
+            let value = [type,tree,id];
+            const result = await pool.query(querystring,value);
+            console.log(result);
+            res.send(result.rows);
+        } catch (e) {
+            console.log(e.stack)
+        }
+    }
+    patchApples()
+});
 
 
-// app.delete('/api/apples/:id', (req, res) => {
-//     async function deleteApples() {
-//         
-//         try {
-//             
-//         } catch(e) {
-//             console.log(e.stack)
-//         }
-//     }
-//     deleteApples()
-// });
+app.delete('/api/apples/:id', (req, res) => {
+    async function deleteApples() {
+        try {
+            let id = req.params.id;
+            let apples = req.body;
+            let type = apples.type;
+            let tree = apples.tree;
+            let querystring = 'DELETE FROM apples WHERE id =$1';
+            let value = [id];
+            const result = await pool.query(querystring,value);
+            console.log(result);
+            res.send(result.rows);
+        } catch (e) {
+            console.log(e.stack)
+        }
+    }
+    deleteApples()
+});
 
 
 app.get('/api/oranges/:id', (req, res) => {
